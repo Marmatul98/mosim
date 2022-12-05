@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/mosim.iml" filepath="$PROJECT_DIR$/.idea/mosim.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../proxyqb/.idea/proxyqb.iml" filepath="$PROJECT_DIR$/../proxyqb/.idea/proxyqb.iml" />
     </modules>
   </component>
 </project>
