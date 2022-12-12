@@ -31,6 +31,65 @@ export enum SquareTypes {
   danger = "danger",
 }
 
+export const kek = {
+  road: {
+    speed: 1.2,
+    danger: 0.5,
+    healthLost: 0,
+    rest: 0,
+    factor: 1,
+  },
+  grass: {
+    speed: 1,
+    danger: 0.5,
+    healthLost: 0,
+    rest: 0,
+    factor: 1,
+  },
+  mountain: {
+    speed: 0.6,
+    danger: 0.9,
+    healthLost: 0,
+    rest: 0,
+    factor: 1,
+  },
+  forest: {
+    speed: 0.8,
+    danger: 0.8,
+    healthLost: 0,
+    rest: 0,
+    factor: 1,
+  },
+  water: {
+    speed: 0,
+    danger: 1,
+    healthLost: 1,
+    rest: 0,
+    factor: 1,
+  },
+  pub: {
+    speed: 1,
+    danger: 0.2,
+    healthLost: 0,
+    rest: 1,
+    factor: 1,
+  },
+  shop: {
+    speed: 1,
+    danger: 0.2,
+    healthLost: 0,
+    rest: 1,
+    factor: 1,
+  },
+  danger: {
+    speed: 1,
+    danger: 1,
+    healthLost: 1,
+    rest: 0,
+    factor: 1,
+  },
+};
+
 const Map = (): ReactElement => {
   const width = 9;
   const height = 9;
@@ -61,6 +120,10 @@ const Map = (): ReactElement => {
   const setCurrentLocation = () => {
     handleSelection(SquareTypes.location);
   };
+
+  const setSettings = (settings:any) => {
+    console.log(settings)
+  }
 
   const onSquareClick = (square: Square) => {
     const newSquare: Square = {
@@ -188,7 +251,7 @@ const Map = (): ReactElement => {
           ))}
         </Box>
       </Box>
-      <Settings setCurrentLocation={setCurrentLocation} />
+      <Settings setCurrentLocation={setCurrentLocation} setSettings={setSettings} />
     </Box>
   );
 };
