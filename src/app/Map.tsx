@@ -1,5 +1,5 @@
-import React, {ReactElement, useEffect, useState} from "react";
-import {Box, Typography} from "@mui/material";
+import React, { ReactElement, useEffect, useState } from "react";
+import { Box, Button, Typography } from "@mui/material";
 import GameSquare from "../shapes/GameSquare";
 import RoadImage from "../bgs/road.png";
 import GrassImage from "../bgs/grass.png";
@@ -16,6 +16,14 @@ interface Square {
   y: number;
   isCurrent: boolean;
   type: SquareTypes;
+}
+
+interface ISettings {
+  energy: number;
+  favoritePlaces: string[];
+  health: number;
+  speed: number;
+  unfavoredPlaces: string[];
 }
 
 export enum SquareTypes {
@@ -97,14 +105,15 @@ const Map = (): ReactElement => {
   const totalHeight = height * 55;
   const [squares, setSquares] = useState<Square[]>([]);
   const [type, setType] = useState<SquareTypes>(SquareTypes.undefined);
+  const [mapSettings, setMapSettings] = useState<ISettings>();
 
   useEffect(() => {
     const generatedSquares: Square[] = [];
     for (let i = 0; i < width; i++) {
       for (let j = 0; j < height; j++) {
         generatedSquares.push({
-          x: i,
-          y: j,
+          x: j,
+          y: i,
           isCurrent: i === 0 && j === 0,
           type: SquareTypes.undefined,
         });
@@ -121,9 +130,9 @@ const Map = (): ReactElement => {
     handleSelection(SquareTypes.location);
   };
 
-  const setSettings = (settings:any) => {
-    console.log(settings)
-  }
+  const setSettings = (settings: any) => {
+    setMapSettings(settings);
+  };
 
   const onSquareClick = (square: Square) => {
     const newSquare: Square = {
@@ -144,6 +153,64 @@ const Map = (): ReactElement => {
       }
     });
     setSquares(newSquares);
+  };
+
+  const getAvailableSquares = (): Square[] => {
+    const currentLocation = squares.find((s) => s.isCurrent);
+    const availableSquares: Square[] = [];
+    if (currentLocation) {
+      if (currentLocation.y !== 0) {
+        const up = squares.find(
+          (s) => s.x === currentLocation.x && s.y === currentLocation.y - 1
+        );
+        if (up) {
+          availableSquares.push(up);
+        }
+      }
+      if (currentLocation.x !== 0) {
+        const left = squares.find(
+          (s) => s.x === currentLocation.x - 1 && s.y === currentLocation.y
+        );
+        if (left) {
+          availableSquares.push(left);
+        }
+      }
+      if (currentLocation.y !== height - 1) {
+        const down = squares.find(
+          (s) => s.x === currentLocation.x && s.y === currentLocation.y + 1
+        );
+        if (down) {
+          availableSquares.push(down);
+        }
+      }
+      if (currentLocation.x !== width - 1) {
+        const right = squares.find(
+          (s) => s.x === currentLocation.x + 1 && s.y === currentLocation.y
+        );
+        if (right) {
+          availableSquares.push(right);
+        }
+      }
+    }
+
+    return availableSquares;
+  };
+
+  const getNextSquare = () => {
+    const availableSquares = getAvailableSquares();
+    const kek = availableSquares.map((square) => {
+      console.log(mapSettings);
+      const kek = mapSettings?.favoritePlaces.includes(square.type);
+      console.log(kek, square)
+    });
+  };
+
+  const startSimulation = () => {
+    // //@ts-ignore
+    // while (mapSettings.energy !== 0 && mapSettings.health !== 0) {
+    //   getNextSquare()
+    // }
+    getNextSquare();
   };
 
   return (
@@ -250,8 +317,16 @@ const Map = (): ReactElement => {
             />
           ))}
         </Box>
+        <Box>
+          <Button variant={"contained"} onClick={startSimulation}>
+            Start
+          </Button>
+        </Box>
       </Box>
-      <Settings setCurrentLocation={setCurrentLocation} setSettings={setSettings} />
+      <Settings
+        setCurrentLocation={setCurrentLocation}
+        setSettings={setSettings}
+      />
     </Box>
   );
 };
