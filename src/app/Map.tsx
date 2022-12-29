@@ -10,6 +10,8 @@ import PubImage from "../bgs/pub.png";
 import ShopImage from "../bgs/shop.png";
 import DangerImage from "../bgs/danger.png";
 import Settings from "./Settings";
+// @ts-ignore
+import rouletteWheelSelection from "roulette-wheel-selection";
 
 interface Square {
   x: number;
@@ -198,19 +200,53 @@ const Map = (): ReactElement => {
 
   const getNextSquare = () => {
     const availableSquares = getAvailableSquares();
-    const kek = availableSquares.map((square) => {
-      console.log(mapSettings);
-      const kek = mapSettings?.favoritePlaces.includes(square.type);
-      console.log(kek, square)
-    });
+    const favoriteAvailableSquares = availableSquares.filter((square) =>
+      mapSettings?.favoritePlaces.includes(square.type)
+    );
+    const unfavoredAvailableSquares = availableSquares.filter((square) =>
+      mapSettings?.unfavoredPlaces.includes(square.type)
+    );
+    const otherSquares = availableSquares.filter(
+      (square) =>
+        !mapSettings?.favoritePlaces.includes(square.type) &&
+        !mapSettings?.unfavoredPlaces.includes(square.type)
+    );
+
+    const squares = [
+      ...favoriteAvailableSquares.map((square) => ({ square, weight: 40 })),
+      ...unfavoredAvailableSquares.map((square) => ({ square, weight: 20 })),
+      ...otherSquares.map((square) => ({ square, weight: 30 })),
+    ];
+
+    const rouletteSelection = rouletteWheelSelection(squares, "weight");
+    return rouletteSelection.square;
   };
 
-  const startSimulation = () => {
+  const movePlayer = (square: Square) => {
+    const newSquare: Square = {
+      ...square,
+      isCurrent: true,
+    };
+    const newSquares = squares.map((sq) => {
+      if (sq.x === square.x && sq.y === square.y) {
+        return newSquare;
+      } else {
+        return {
+          ...sq,
+          isCurrent: false,
+        };
+      }
+    });
+    setSquares(newSquares);
+  };
+
+  const makeStep = () => {
     // //@ts-ignore
     // while (mapSettings.energy !== 0 && mapSettings.health !== 0) {
     //   getNextSquare()
     // }
-    getNextSquare();
+    const nextSquare = getNextSquare();
+    movePlayer(nextSquare);
   };
 
   return (
@@ -318,8 +354,8 @@ const Map = (): ReactElement => {
           ))}
         </Box>
         <Box>
-          <Button variant={"contained"} onClick={startSimulation}>
-            Start
+          <Button variant={"contained"} onClick={makeStep}>
+            Next step
           </Button>
         </Box>
       </Box>
