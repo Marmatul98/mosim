@@ -10,6 +10,7 @@ import PubImage from "../bgs/pub.png";
 import ShopImage from "../bgs/shop.png";
 import DangerImage from "../bgs/danger.png";
 import Settings from "./Settings";
+import Character from "./Character";
 // @ts-ignore
 import rouletteWheelSelection from "roulette-wheel-selection";
 
@@ -42,60 +43,67 @@ export enum SquareTypes {
 }
 
 export const kek = {
-  road: {
+  "road": {
     speed: 1.2,
     danger: 0.5,
     healthLost: 0,
     rest: 0,
     factor: 1,
   },
-  grass: {
+  "grass": {
     speed: 1,
     danger: 0.5,
     healthLost: 0,
     rest: 0,
     factor: 1,
   },
-  mountain: {
+  "mountain": {
     speed: 0.6,
     danger: 0.9,
     healthLost: 0,
     rest: 0,
     factor: 1,
   },
-  forest: {
+  "forest": {
     speed: 0.8,
     danger: 0.8,
     healthLost: 0,
     rest: 0,
     factor: 1,
   },
-  water: {
+  "water": {
     speed: 0,
     danger: 1,
     healthLost: 1,
     rest: 0,
     factor: 1,
   },
-  pub: {
+  "pub": {
     speed: 1,
     danger: 0.2,
     healthLost: 0,
     rest: 1,
     factor: 1,
   },
-  shop: {
+  "shop": {
     speed: 1,
     danger: 0.2,
     healthLost: 0,
     rest: 1,
     factor: 1,
   },
-  danger: {
+  "danger": {
     speed: 1,
     danger: 1,
     healthLost: 1,
     rest: 0,
+    factor: 1,
+  },
+  "undefined": {
+    speed: 1,
+    danger: 1,
+    healthLost: 1,
+    rest: 1,
     factor: 1,
   },
 };
@@ -108,6 +116,8 @@ const Map = (): ReactElement => {
   const [squares, setSquares] = useState<Square[]>([]);
   const [type, setType] = useState<SquareTypes>(SquareTypes.undefined);
   const [mapSettings, setMapSettings] = useState<ISettings>();
+  const [currentHealth, setCurrentHealth] = useState(100);
+  const [currentEnergy, setCurrentEnergy] = useState(100);
 
   useEffect(() => {
     const generatedSquares: Square[] = [];
@@ -133,8 +143,14 @@ const Map = (): ReactElement => {
   };
 
   const setSettings = (settings: any) => {
+    setCurrentCharacter(settings);
     setMapSettings(settings);
   };
+  
+  const setCurrentCharacter = (settings: ISettings) => {
+    setCurrentEnergy(settings.energy);
+    setCurrentHealth(settings.health);
+  }
 
   const onSquareClick = (square: Square) => {
     const newSquare: Square = {
@@ -237,14 +253,26 @@ const Map = (): ReactElement => {
         };
       }
     });
+
+    takeAction(newSquare); // (-: ???
     setSquares(newSquares);
   };
+
+  const takeAction = (square: Square) => {
+    // @ts-ignore 
+    const it = kek[SquareTypes[square.type]];
+
+    setCurrentEnergy(currentEnergy - 1);
+    setCurrentHealth(currentHealth - it.healthLost);
+    console.log(it.rest);
+  }
 
   const makeStep = () => {
     // //@ts-ignore
     // while (mapSettings.energy !== 0 && mapSettings.health !== 0) {
     //   getNextSquare()
     // }
+    
     const nextSquare = getNextSquare();
     movePlayer(nextSquare);
   };
@@ -258,6 +286,10 @@ const Map = (): ReactElement => {
         marginTop: 5,
       }}
     >
+      <Character
+      health={currentHealth}
+      energy={currentEnergy}
+      />
       <Box
         sx={{
           display: "flex",
