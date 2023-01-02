@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, Dialog, DialogActions, DialogTitle, DialogContent, DialogContentText } from "@mui/material";
 import GameSquare from "../shapes/GameSquare";
 import RoadImage from "../bgs/road.png";
 import GrassImage from "../bgs/grass.png";
@@ -17,6 +17,7 @@ import rouletteWheelSelection from "roulette-wheel-selection";
 interface Square {
   x: number;
   y: number;
+  numberOfSteps: Number;
   isCurrent: boolean;
   type: SquareTypes;
 }
@@ -118,6 +119,7 @@ const Map = (): ReactElement => {
   const [mapSettings, setMapSettings] = useState<ISettings>();
   const [currentHealth, setCurrentHealth] = useState(100);
   const [currentEnergy, setCurrentEnergy] = useState(100);
+  const [open, setOpen] = React.useState(false);
 
   useEffect(() => {
     const generatedSquares: Square[] = [];
@@ -126,6 +128,7 @@ const Map = (): ReactElement => {
         generatedSquares.push({
           x: j,
           y: i,
+          numberOfSteps: 0,
           isCurrent: i === 0 && j === 0,
           type: SquareTypes.undefined,
         });
@@ -150,6 +153,9 @@ const Map = (): ReactElement => {
   const setCurrentCharacter = (settings: ISettings) => {
     setCurrentEnergy(settings.energy);
     setCurrentHealth(settings.health);
+  }
+  const handleOkButton = () => {
+    setOpen(false);
   }
 
   const onSquareClick = (square: Square) => {
@@ -254,7 +260,6 @@ const Map = (): ReactElement => {
       }
     });
 
-    takeAction(newSquare); // (-: ???
     setSquares(newSquares);
   };
 
@@ -264,7 +269,6 @@ const Map = (): ReactElement => {
 
     setCurrentEnergy(currentEnergy - 1);
     setCurrentHealth(currentHealth - it.healthLost);
-    console.log(it.rest);
   }
 
   const makeStep = () => {
@@ -272,8 +276,16 @@ const Map = (): ReactElement => {
     // while (mapSettings.energy !== 0 && mapSettings.health !== 0) {
     //   getNextSquare()
     // }
+
+    if(currentHealth <= 0 || currentEnergy <= 0)
+    {
+      setOpen(true);
+    }
     
     const nextSquare = getNextSquare();
+    nextSquare.numberOfSteps++;
+
+    takeAction(nextSquare);
     movePlayer(nextSquare);
   };
 
@@ -395,6 +407,25 @@ const Map = (): ReactElement => {
         setCurrentLocation={setCurrentLocation}
         setSettings={setSettings}
       />
+      <Dialog
+        open={open}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Simulace ukončena"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Vypršelo zdraví nebo energie.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleOkButton} autoFocus >
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
