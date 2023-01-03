@@ -1,6 +1,15 @@
 import React, { ReactElement, useEffect, useRef } from "react";
-import useState from 'react-usestateref';
-import { Box, Button, Typography, Dialog, DialogActions, DialogTitle, DialogContent, DialogContentText } from "@mui/material";
+import useState from "react-usestateref";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Typography,
+} from "@mui/material";
 import GameSquare from "../shapes/GameSquare";
 import RoadImage from "../bgs/road.png";
 import GrassImage from "../bgs/grass.png";
@@ -14,9 +23,9 @@ import Settings from "./Settings";
 import Character from "./Character";
 // @ts-ignore
 import rouletteWheelSelection from "roulette-wheel-selection";
-import { setDefaultResultOrder } from "dns";
+import { HeatmapChart } from "./HeatmapChart";
 
-interface Square {
+export interface Square {
   x: number;
   y: number;
   numberOfSteps: Number;
@@ -47,63 +56,63 @@ export enum SquareTypes {
 }
 
 export const kek = {
-  "road": {
+  road: {
     speed: 1.2,
     danger: 0.5,
     healthLost: 0,
     rest: 0,
     factor: 1,
   },
-  "grass": {
+  grass: {
     speed: 1,
     danger: 0.5,
     healthLost: 0,
     rest: 0,
     factor: 1,
   },
-  "mountain": {
+  mountain: {
     speed: 0.6,
     danger: 0.9,
     healthLost: 0,
     rest: 0,
     factor: 1,
   },
-  "forest": {
+  forest: {
     speed: 0.8,
     danger: 0.8,
     healthLost: 0,
     rest: 0,
     factor: 1,
   },
-  "water": {
+  water: {
     speed: 0,
     danger: 1,
     healthLost: 1,
     rest: 0,
     factor: 1,
   },
-  "pub": {
+  pub: {
     speed: 1,
     danger: 0.2,
     healthLost: 0,
     rest: 1,
     factor: 1,
   },
-  "shop": {
+  shop: {
     speed: 1,
     danger: 0.2,
     healthLost: 0,
     rest: 1,
     factor: 1,
   },
-  "danger": {
+  danger: {
     speed: 1,
     danger: 1,
     healthLost: 1,
     rest: 0,
     factor: 1,
   },
-  "undefined": {
+  undefined: {
     speed: 1,
     danger: 1,
     healthLost: 1,
@@ -125,9 +134,8 @@ const Map = (): ReactElement => {
   const [currentEnergy, setCurrentEnergy] = useState(100);
   const [open, setOpen] = React.useState(false);
   const [steps, setSteps] = React.useState(0);
-  var [distance, setDistance, distanceRef] = useState(1);
-  var refSpeed = useRef<number>(1);
-
+  const [distance, setDistance, distanceRef] = useState(1);
+  const refSpeed = useRef<number>(1);
 
   useEffect(() => {
     const generatedSquares: Square[] = [];
@@ -162,10 +170,10 @@ const Map = (): ReactElement => {
   const setCurrentCharacter = (settings: ISettings) => {
     setCurrentEnergy(settings.energy);
     setCurrentHealth(settings.health);
-  }
+  };
   const handleOkButton = () => {
     setOpen(false);
-  }
+  };
 
   const onSquareClick = (square: Square) => {
     const newSquare: Square = {
@@ -277,12 +285,12 @@ const Map = (): ReactElement => {
   };
 
   const takeAction = (square: Square) => {
-    // @ts-ignore 
+    // @ts-ignore
     const it = kek[SquareTypes[square.type]];
 
     setCurrentEnergy(currentEnergy - 1);
     setCurrentHealth(currentHealth - it.healthLost);
-  }
+  };
 
   const makeStep = () => {
     // //@ts-ignore
@@ -297,14 +305,14 @@ const Map = (): ReactElement => {
     }
 
     // @ts-ignore
-    setDistance(distanceRef.current - (mapSettings?.speed * refSpeed.current));
+    setDistance(distanceRef.current - mapSettings?.speed * refSpeed.current);
 
     if (distanceRef.current < 0) {
       setDistance(1);
 
       const nextSquare = getNextSquare();
 
-      // @ts-ignore 
+      // @ts-ignore
       const it = kek[SquareTypes[nextSquare.type]];
 
       refSpeed.current = it.speed;
@@ -317,153 +325,157 @@ const Map = (): ReactElement => {
 
       takeAction(nextSquare);
       movePlayer(nextSquare);
-    }
-    else {
+    } else {
       setSteps(steps + 1);
     }
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        marginTop: 5,
-      }}
-    >
-      <Character
-        health={currentHealth}
-        energy={currentEnergy}
-        steps={steps}
-        distance={distance}
-      />
+    <Box>
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          marginTop: 5,
         }}
       >
-        <Typography>
-          To change game squares select type, then click on game square
-        </Typography>
+        <Character
+          health={currentHealth}
+          energy={currentEnergy}
+          steps={steps}
+          distance={distance}
+        />
         <Box
           sx={{
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <img
-            onClick={() => handleSelection(SquareTypes.road)}
-            src={RoadImage}
-            width={60}
-            height={60}
-            alt={"road"}
-          />
-          <img
-            onClick={() => handleSelection(SquareTypes.grass)}
-            src={GrassImage}
-            width={60}
-            height={60}
-            alt={"grass"}
-          />
-          <img
-            onClick={() => handleSelection(SquareTypes.mountain)}
-            src={MountainImage}
-            width={60}
-            height={60}
-            alt={"mountain"}
-          />
-          <img
-            onClick={() => handleSelection(SquareTypes.forest)}
-            src={ForestImage}
-            width={60}
-            height={60}
-            alt={"forest"}
-          />
-          <img
-            onClick={() => handleSelection(SquareTypes.water)}
-            src={WaterImage}
-            width={60}
-            height={60}
-            alt={"water"}
-          />
-          <img
-            onClick={() => handleSelection(SquareTypes.pub)}
-            src={PubImage}
-            width={60}
-            height={60}
-            alt={"pub"}
-          />
-          <img
-            onClick={() => handleSelection(SquareTypes.shop)}
-            src={ShopImage}
-            width={60}
-            height={60}
-            alt={"shop"}
-          />
-          <img
-            onClick={() => handleSelection(SquareTypes.danger)}
-            src={DangerImage}
-            width={60}
-            height={60}
-            alt={"danger"}
-          />
-        </Box>
-        <Typography>Selected: {type}</Typography>
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "center",
-            width: totalWidth,
-            height: totalHeight,
-          }}
-        >
-          {squares.map((sq, i) => (
-            <GameSquare
-              onClick={() => onSquareClick(sq)}
-              isCurrent={sq.isCurrent}
-              isSelected={sq.isSelected}
-              type={sq.type}
-              key={i}
+          <Typography>
+            To change game squares select type, then click on game square
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <img
+              onClick={() => handleSelection(SquareTypes.road)}
+              src={RoadImage}
+              width={60}
+              height={60}
+              alt={"road"}
             />
-          ))}
+            <img
+              onClick={() => handleSelection(SquareTypes.grass)}
+              src={GrassImage}
+              width={60}
+              height={60}
+              alt={"grass"}
+            />
+            <img
+              onClick={() => handleSelection(SquareTypes.mountain)}
+              src={MountainImage}
+              width={60}
+              height={60}
+              alt={"mountain"}
+            />
+            <img
+              onClick={() => handleSelection(SquareTypes.forest)}
+              src={ForestImage}
+              width={60}
+              height={60}
+              alt={"forest"}
+            />
+            <img
+              onClick={() => handleSelection(SquareTypes.water)}
+              src={WaterImage}
+              width={60}
+              height={60}
+              alt={"water"}
+            />
+            <img
+              onClick={() => handleSelection(SquareTypes.pub)}
+              src={PubImage}
+              width={60}
+              height={60}
+              alt={"pub"}
+            />
+            <img
+              onClick={() => handleSelection(SquareTypes.shop)}
+              src={ShopImage}
+              width={60}
+              height={60}
+              alt={"shop"}
+            />
+            <img
+              onClick={() => handleSelection(SquareTypes.danger)}
+              src={DangerImage}
+              width={60}
+              height={60}
+              alt={"danger"}
+            />
+          </Box>
+          <Typography>Selected: {type}</Typography>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "center",
+              width: totalWidth,
+              height: totalHeight,
+            }}
+          >
+            {squares.map((sq, i) => (
+              <GameSquare
+                onClick={() => onSquareClick(sq)}
+                isCurrent={sq.isCurrent}
+                isSelected={sq.isSelected}
+                type={sq.type}
+                key={i}
+              />
+            ))}
+          </Box>
+          <Box>
+            <Button variant={"contained"} onClick={makeStep}>
+              Next step
+            </Button>
+          </Box>
         </Box>
-        <Box>
-          <Button variant={"contained"} onClick={makeStep}>
-            Next step
-          </Button>
-        </Box>
-      </Box>
-      <Settings
-        setCurrentLocation={setCurrentLocation}
-        setSettings={setSettings}
-      />
+        <Settings
+          setCurrentLocation={setCurrentLocation}
+          setSettings={setSettings}
+        />
 
-      <Dialog
-        open={open}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Simulation ended."}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Out of energy or health.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleOkButton} autoFocus >
-            Ok
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <Dialog
+          open={open}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"Simulation ended."}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+              Out of energy or health.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleOkButton} autoFocus>
+              Ok
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+      <Box sx={{ mt: 4 }}>
+        <HeatmapChart height={height} width={width} squares={squares} />
+      </Box>
     </Box>
   );
 };
