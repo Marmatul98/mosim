@@ -85,9 +85,9 @@ export const kek = {
     factor: 1,
   },
   water: {
-    speed: 0,
+    speed: 1,
     danger: 1,
-    healthLost: 1,
+    healthLost: 100,
     rest: 0,
     factor: 1,
   },
@@ -288,7 +288,7 @@ const Map = (): ReactElement => {
     // @ts-ignore
     const it = kek[SquareTypes[square.type]];
 
-    setCurrentEnergy(currentEnergy - 1);
+    setCurrentEnergy(currentEnergy - 1 + it.rest);
     setCurrentHealth(currentHealth - it.healthLost);
   };
 
@@ -303,30 +303,31 @@ const Map = (): ReactElement => {
     if (currentHealth <= 0 || currentEnergy <= 0) {
       setOpen(true);
     }
-
-    // @ts-ignore
-    setDistance(distanceRef.current - mapSettings?.speed * refSpeed.current);
-
-    if (distanceRef.current < 0) {
-      setDistance(1);
-
-      const nextSquare = getNextSquare();
-
+    else {
       // @ts-ignore
-      const it = kek[SquareTypes[nextSquare.type]];
+      setDistance(distanceRef.current - mapSettings?.speed * refSpeed.current);
 
-      refSpeed.current = it.speed;
+      if (distanceRef.current < 0) {
+        setDistance(1);
 
-      setSquares(squares);
+        const nextSquare = getNextSquare();
 
-      nextSquare.isSelected = true;
+        // @ts-ignore
+        const it = kek[SquareTypes[nextSquare.type]];
 
-      nextSquare.numberOfSteps++;
+        refSpeed.current = it.speed;
 
-      takeAction(nextSquare);
-      movePlayer(nextSquare);
-    } else {
-      setSteps(steps + 1);
+        setSquares(squares);
+
+        nextSquare.isSelected = true;
+
+        nextSquare.numberOfSteps++;
+
+        takeAction(nextSquare);
+        movePlayer(nextSquare);
+      } else {
+        setSteps(steps + 1);
+      }
     }
   };
 
