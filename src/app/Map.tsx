@@ -1,5 +1,6 @@
-import React, { ReactElement, useEffect, useState } from "react";
-import { Box, Button, Typography } from "@mui/material";
+import React, { ReactElement, useEffect, useRef } from "react";
+import useState from 'react-usestateref';
+import { Box, Button, Typography, Dialog, DialogActions, DialogTitle, DialogContent, DialogContentText } from "@mui/material";
 import GameSquare from "../shapes/GameSquare";
 import RoadImage from "../bgs/road.png";
 import GrassImage from "../bgs/grass.png";
@@ -13,11 +14,14 @@ import Settings from "./Settings";
 import Character from "./Character";
 // @ts-ignore
 import rouletteWheelSelection from "roulette-wheel-selection";
+import { setDefaultResultOrder } from "dns";
 
 interface Square {
   x: number;
   y: number;
+  numberOfSteps: Number;
   isCurrent: boolean;
+  isSelected: boolean;
   type: SquareTypes;
 }
 
@@ -113,11 +117,15 @@ const Map = (): ReactElement => {
   const height = 9;
   const totalWidth = width * 55;
   const totalHeight = height * 55;
+  const travelDistance = 0.5;
   const [squares, setSquares] = useState<Square[]>([]);
   const [type, setType] = useState<SquareTypes>(SquareTypes.undefined);
   const [mapSettings, setMapSettings] = useState<ISettings>();
   const [currentHealth, setCurrentHealth] = useState(100);
   const [currentEnergy, setCurrentEnergy] = useState(100);
+  const [open, setOpen] = React.useState(false);
+  const [steps, setSteps] = React.useState(0);
+  var [distance, setDistance, distanceRef] = useState(1);
 
   useEffect(() => {
     const generatedSquares: Square[] = [];
@@ -126,7 +134,9 @@ const Map = (): ReactElement => {
         generatedSquares.push({
           x: j,
           y: i,
+          numberOfSteps: 0,
           isCurrent: i === 0 && j === 0,
+          isSelected: false,
           type: SquareTypes.undefined,
         });
       }
@@ -146,10 +156,13 @@ const Map = (): ReactElement => {
     setCurrentCharacter(settings);
     setMapSettings(settings);
   };
-  
+
   const setCurrentCharacter = (settings: ISettings) => {
     setCurrentEnergy(settings.energy);
     setCurrentHealth(settings.health);
+  }
+  const handleOkButton = () => {
+    setOpen(false);
   }
 
   const onSquareClick = (square: Square) => {
@@ -158,6 +171,7 @@ const Map = (): ReactElement => {
       isCurrent: type === SquareTypes.location ? true : square.isCurrent,
       type: type === SquareTypes.location ? square.type : type,
     };
+
     const newSquares = squares.map((sq) => {
       if (sq.x === square.x && sq.y === square.y) {
         return newSquare;
@@ -235,6 +249,7 @@ const Map = (): ReactElement => {
     ];
 
     const rouletteSelection = rouletteWheelSelection(squares, "weight");
+
     return rouletteSelection.square;
   };
 
@@ -242,7 +257,9 @@ const Map = (): ReactElement => {
     const newSquare: Square = {
       ...square,
       isCurrent: true,
+      isSelected: false,
     };
+
     const newSquares = squares.map((sq) => {
       if (sq.x === square.x && sq.y === square.y) {
         return newSquare;
@@ -254,7 +271,6 @@ const Map = (): ReactElement => {
       }
     });
 
-    takeAction(newSquare); // (-: ???
     setSquares(newSquares);
   };
 
@@ -264,7 +280,6 @@ const Map = (): ReactElement => {
 
     setCurrentEnergy(currentEnergy - 1);
     setCurrentHealth(currentHealth - it.healthLost);
-    console.log(it.rest);
   }
 
   const makeStep = () => {
@@ -272,9 +287,33 @@ const Map = (): ReactElement => {
     // while (mapSettings.energy !== 0 && mapSettings.health !== 0) {
     //   getNextSquare()
     // }
-    
-    const nextSquare = getNextSquare();
-    movePlayer(nextSquare);
+    console.log(distanceRef.current);
+
+    //setSteps(steps + 1);
+
+    if (currentHealth <= 0 || currentEnergy <= 0) {
+      setOpen(true);
+    }
+
+    setDistance(distanceRef.current - travelDistance);
+
+    if (distanceRef.current < 0) {
+      setDistance(1);
+
+      const nextSquare = getNextSquare();
+
+      setSquares(squares);
+
+      nextSquare.isSelected = true;
+
+      nextSquare.numberOfSteps++;
+
+      takeAction(nextSquare);
+      movePlayer(nextSquare);
+    }
+    else {
+      setSteps(steps + 1);
+    }
   };
 
   return (
@@ -287,8 +326,10 @@ const Map = (): ReactElement => {
       }}
     >
       <Character
-      health={currentHealth}
-      energy={currentEnergy}
+        health={currentHealth}
+        energy={currentEnergy}
+        steps={steps}
+        distance={distance}
       />
       <Box
         sx={{
@@ -380,6 +421,7 @@ const Map = (): ReactElement => {
             <GameSquare
               onClick={() => onSquareClick(sq)}
               isCurrent={sq.isCurrent}
+              isSelected={sq.isSelected}
               type={sq.type}
               key={i}
             />
@@ -395,6 +437,26 @@ const Map = (): ReactElement => {
         setCurrentLocation={setCurrentLocation}
         setSettings={setSettings}
       />
+
+      <Dialog
+        open={open}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Simulation ended."}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Out of energy or health.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleOkButton} autoFocus >
+            Ok
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

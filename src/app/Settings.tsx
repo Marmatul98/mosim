@@ -36,7 +36,7 @@ const Settings = ({ setCurrentLocation, setSettings }: Props): ReactElement => {
   const [unfavoredPlaces, setUnfavoredPlaces] = useState<string[]>([]);
   const [health, setHealth] = useState<number | number[]>(100);
   const [energy, setEnergy] = useState<number | number[]>(100);
-  const [speed, setSpeed] = useState<number | number[]>(100);
+  const [speed, setSpeed] = useState<number | number[]>(1);
 
   useEffect(() => {
     confirmSettings()

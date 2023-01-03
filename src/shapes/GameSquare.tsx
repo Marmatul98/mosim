@@ -14,6 +14,7 @@ interface Props {
   onClick: () => void;
   type: SquareTypes;
   isCurrent?: boolean;
+  isSelected?: boolean;
 }
 
 const typeToImage = {
@@ -27,7 +28,7 @@ const typeToImage = {
   danger: DangerImage,
 };
 
-const GameSquare = ({ isCurrent, onClick, type }: Props): ReactElement => {
+const GameSquare = ({ isCurrent, isSelected, onClick, type }: Props): ReactElement => {
   const [image, setImage] = useState<any>();
 
   useEffect(() => {
@@ -47,6 +48,7 @@ const GameSquare = ({ isCurrent, onClick, type }: Props): ReactElement => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        borderColor: (isSelected ? "red" : "black"),
       }}
     >
       {isCurrent && (
