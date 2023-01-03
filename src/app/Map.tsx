@@ -126,6 +126,8 @@ const Map = (): ReactElement => {
   const [open, setOpen] = React.useState(false);
   const [steps, setSteps] = React.useState(0);
   var [distance, setDistance, distanceRef] = useState(1);
+  var refSpeed = useRef<number>(1);
+
 
   useEffect(() => {
     const generatedSquares: Square[] = [];
@@ -287,7 +289,6 @@ const Map = (): ReactElement => {
     // while (mapSettings.energy !== 0 && mapSettings.health !== 0) {
     //   getNextSquare()
     // }
-    console.log(distanceRef.current);
 
     //setSteps(steps + 1);
 
@@ -295,12 +296,18 @@ const Map = (): ReactElement => {
       setOpen(true);
     }
 
-    setDistance(distanceRef.current - travelDistance);
+    // @ts-ignore
+    setDistance(distanceRef.current - (mapSettings?.speed * refSpeed.current));
 
     if (distanceRef.current < 0) {
       setDistance(1);
 
       const nextSquare = getNextSquare();
+
+      // @ts-ignore 
+      const it = kek[SquareTypes[nextSquare.type]];
+
+      refSpeed.current = it.speed;
 
       setSquares(squares);
 
